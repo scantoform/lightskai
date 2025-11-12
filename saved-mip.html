@@ -1,0 +1,2674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Light Skai - Meeting Intelligence Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            min-height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 20px 40px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 20px;
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        .brand-name {
+            font-size: 26px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #1e293b 0%, #6366f1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.8px;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 16px;
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+
+        .user-email {
+            font-size: 14px;
+            color: #475569;
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            background: white;
+            border: 2px solid #fca5a5;
+            color: #dc2626;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.1);
+        }
+
+        .logout-btn:hover {
+            background: #fef2f2;
+            border-color: #dc2626;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+        }
+
+        .settings-btn {
+            background: white;
+            border: 2px solid #c7d2fe;
+            color: #6366f1;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
+        }
+
+        .settings-btn:hover {
+            background: #eef2ff;
+            border-color: #6366f1;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        .help-btn {
+            background: white;
+            border: 2px solid #e0e7ff;
+            color: #6366f1;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
+        }
+
+        .help-btn:hover {
+            background: #eef2ff;
+            border-color: #6366f1;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        .version {
+            font-size: 12px;
+            color: #94a3b8;
+            font-weight: 600;
+            background: #f1f5f9;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+
+        /* Auth Screen Styles */
+        .auth-container {
+            display: none;
+            max-width: 440px;
+            margin: 80px auto;
+            padding: 0 20px;
+        }
+
+        .auth-container.active {
+            display: block;
+        }
+
+        .auth-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 48px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+
+        .auth-logo {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 28px;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+            margin: 0 auto 20px;
+        }
+
+        .auth-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .auth-subtitle {
+            color: #64748b;
+            font-size: 15px;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .form-input {
+            padding: 14px 16px;
+            border: 2px solid #e0e7ff;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        .auth-btn {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 14px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+            margin-top: 8px;
+        }
+
+        .auth-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(99, 102, 241, 0.4);
+        }
+
+        .auth-btn:disabled {
+            background: #e5e7eb;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+            color: #9ca3af;
+        }
+
+        .auth-toggle {
+            text-align: center;
+            margin-top: 24px;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .auth-toggle-link {
+            color: #6366f1;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .auth-toggle-link:hover {
+            text-decoration: underline;
+        }
+
+        .auth-message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .auth-message.active {
+            display: block;
+        }
+
+        .auth-message.error {
+            background: rgba(254, 226, 226, 0.8);
+            color: #dc2626;
+            border: 1px solid #fca5a5;
+        }
+
+        .auth-message.success {
+            background: rgba(209, 250, 229, 0.8);
+            color: #059669;
+            border: 1px solid #6ee7b7;
+        }
+
+        /* Main App Styles */
+        .app-container {
+            display: none;
+        }
+
+        .app-container.active {
+            display: block;
+        }
+
+        /* Admin Panel Styles */
+        .admin-panel {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 40px 20px;
+        }
+
+        .admin-panel.active {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        .admin-panel-content {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            margin: auto;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e7ff;
+        }
+
+        .admin-title {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #1e293b 0%, #6366f1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .admin-close {
+            background: #f1f5f9;
+            border: none;
+            color: #475569;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 24px;
+            font-weight: 700;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .admin-close:hover {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+
+        .admin-section {
+            margin-bottom: 32px;
+        }
+
+        .admin-section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .admin-section-icon {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #ddd6fe 0%, #c7d2fe 100%);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .admin-description {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        .admin-checkbox-group {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 16px;
+            border: 2px solid #e0e7ff;
+        }
+
+        .admin-checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: move;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            background: white;
+            margin-bottom: 8px;
+        }
+
+        .admin-checkbox-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .admin-checkbox-item:hover {
+            border-color: #c7d2fe;
+        }
+
+        .admin-checkbox-item.dragging {
+            opacity: 0.5;
+            background: #ddd6fe;
+            border-color: #6366f1;
+        }
+
+        .admin-select-group {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .admin-select-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .admin-select-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: #6366f1;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            padding-top: 24px;
+            border-top: 2px solid #e0e7ff;
+        }
+
+        .admin-btn {
+            padding: 12px 28px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .admin-btn-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        .admin-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(99, 102, 241, 0.4);
+        }
+
+        .admin-btn-secondary {
+            background: white;
+            color: #475569;
+            border: 2px solid #e0e7ff;
+        }
+
+        .admin-btn-secondary:hover {
+            background: #f8fafc;
+            border-color: #c7d2fe;
+        }
+
+        .admin-btn-reset {
+            background: white;
+            color: #dc2626;
+            border: 2px solid #fca5a5;
+        }
+
+        .admin-btn:disabled {
+            background: #e5e7eb;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+            color: #9ca3af;
+        }
+
+        .admin-success-message {
+            background: linear-gradient(135deg, rgba(236, 253, 245, 0.9) 0%, rgba(209, 250, 229, 0.9) 100%);
+            border: 2px solid #6ee7b7;
+            color: #059669;
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .admin-success-message.active {
+            display: block;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 40px;
+        }
+
+        .page-header {
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .page-title {
+            font-size: 42px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #1e293b 0%, #6366f1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+            letter-spacing: -1.5px;
+        }
+
+        .page-subtitle {
+            color: #64748b;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 28px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .info-icon {
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #ddd6fe 0%, #c7d2fe 100%);
+            color: #6366f1;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: help;
+            transition: all 0.3s ease;
+        }
+
+        .info-icon:hover {
+            background: linear-gradient(135deg, #c7d2fe 0%, #a5b4fc 100%);
+            transform: scale(1.1);
+        }
+
+        .select-all {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #f1f5f9 0%, #e0e7ff 100%);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .select-all:hover {
+            background: linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%);
+            border-color: #c7d2fe;
+        }
+
+        .select-all input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #6366f1;
+        }
+
+        .select-all label {
+            cursor: pointer;
+            color: #1e293b;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: move;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            position: relative;
+        }
+
+        .checkbox-item:hover {
+            background: #f8fafc;
+            border-color: #e0e7ff;
+        }
+
+        .checkbox-item.dragging {
+            opacity: 0.5;
+            background: #ddd6fe;
+            border-color: #6366f1;
+        }
+
+        .checkbox-item.drag-over {
+            border-top: 3px solid #6366f1;
+        }
+
+        .drag-handle {
+            display: flex;
+            align-items: center;
+            color: #94a3b8;
+            font-size: 18px;
+            cursor: move;
+            user-select: none;
+        }
+
+        .drag-handle:hover {
+            color: #6366f1;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #6366f1;
+        }
+
+        .checkbox-item label {
+            cursor: pointer;
+            color: #475569;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        .selector-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .selector-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: #6366f1;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .industry-select {
+            padding: 12px 18px;
+            border: 2px solid #e0e7ff;
+            background: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #475569;
+            transition: all 0.3s ease;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%236366f1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            padding-right: 40px;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.08);
+        }
+
+        .industry-select:hover {
+            border-color: #6366f1;
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.15);
+        }
+
+        .industry-select:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        .upload-section {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .upload-area {
+            border: 3px dashed #c7d2fe;
+            border-radius: 16px;
+            padding: 60px;
+            text-align: center;
+            transition: all 0.4s ease;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(238, 242, 255, 0.8) 100%);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+
+        .upload-area:hover {
+            border-color: #6366f1;
+            background: linear-gradient(135deg, rgba(238, 242, 255, 0.9) 0%, rgba(224, 231, 255, 0.9) 100%);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .upload-area:hover::before {
+            opacity: 1;
+        }
+
+        .upload-area.dragover {
+            border-color: #6366f1;
+            background: linear-gradient(135deg, rgba(224, 231, 255, 0.95) 0%, rgba(199, 210, 254, 0.95) 100%);
+            border-style: solid;
+            transform: scale(1.02);
+        }
+
+        .upload-area.hidden {
+            display: none;
+        }
+
+        .upload-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #ddd6fe 0%, #c7d2fe 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.2);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .upload-icon svg {
+            width: 40px;
+            height: 40px;
+            stroke: #6366f1;
+        }
+
+        .upload-text {
+            color: #1e293b;
+            margin-bottom: 10px;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .upload-subtext {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .browse-btn {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 12px 32px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+            position: relative;
+            z-index: 10;
+        }
+
+        .browse-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .file-info {
+            margin-top: 20px;
+            padding: 16px;
+            background: linear-gradient(135deg, rgba(236, 253, 245, 0.9) 0%, rgba(209, 250, 229, 0.9) 100%);
+            border: 2px solid #6ee7b7;
+            border-radius: 12px;
+            display: none;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 16px rgba(5, 150, 105, 0.1);
+        }
+
+        .file-info.active {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .file-details {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .file-name {
+            color: #059669;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .file-size {
+            color: #6b7280;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .remove-file {
+            background: transparent;
+            border: none;
+            color: #dc2626;
+            cursor: pointer;
+            font-size: 24px;
+            padding: 4px 10px;
+            transition: all 0.2s ease;
+            border-radius: 6px;
+        }
+
+        .remove-file:hover {
+            background: rgba(220, 38, 38, 0.1);
+            transform: scale(1.1);
+        }
+
+        .run-btn {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 14px 40px;
+            border-radius: 10px;
+            border: none;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+            white-space: nowrap;
+            letter-spacing: 0.3px;
+            width: 100%;
+        }
+
+        .run-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(99, 102, 241, 0.4);
+        }
+
+        .run-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .run-btn:disabled {
+            background: #e5e7eb;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+            color: #9ca3af;
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 14px;
+            padding: 12px;
+            background: rgba(254, 226, 226, 0.5);
+            border-radius: 8px;
+            margin-top: 12px;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        @media (max-width: 968px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 0 20px;
+            }
+
+            .navbar {
+                padding: 16px 20px;
+            }
+
+            .page-title {
+                font-size: 32px;
+            }
+
+            .page-subtitle {
+                font-size: 14px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .upload-area {
+                padding: 40px 20px;
+            }
+
+            .upload-icon {
+                width: 60px;
+                height: 60px;
+            }
+
+            .upload-icon svg {
+                width: 30px;
+                height: 30px;
+            }
+
+            .brand-name {
+                font-size: 22px;
+            }
+
+            .logo {
+                width: 36px;
+                height: 36px;
+                font-size: 18px;
+            }
+
+            .auth-card {
+                padding: 32px;
+            }
+
+            .user-info {
+                display: none;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .page-title {
+                font-size: 28px;
+            }
+
+            .nav-right {
+                gap: 12px;
+            }
+
+            .help-btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .logout-btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .version {
+                display: none;
+            }
+
+            .card-header {
+                font-size: 16px;
+            }
+
+            .upload-area {
+                padding: 30px 15px;
+            }
+
+            .upload-text {
+                font-size: 16px;
+            }
+
+            .upload-subtext {
+                font-size: 13px;
+            }
+
+            .browse-btn {
+                padding: 10px 24px;
+                font-size: 14px;
+            }
+
+            .run-btn {
+                padding: 12px 32px;
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="content-wrapper">
+        <!-- Authentication Screen -->
+        <div class="auth-container" id="authContainer">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <div class="auth-logo">LS</div>
+                    <h1 class="auth-title" id="authTitle">Welcome Back</h1>
+                    <p class="auth-subtitle" id="authSubtitle">Sign in to access your meeting intelligence platform</p>
+                </div>
+
+                <div class="auth-message" id="authMessage"></div>
+
+                <form class="auth-form" id="authForm">
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-input" id="emailInput" placeholder="your@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-input" id="passwordInput" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="auth-btn" id="authSubmitBtn">Sign In</button>
+                </form>
+
+                <div class="auth-toggle">
+                    <span id="authToggleText">Don't have an account?</span>
+                    <a class="auth-toggle-link" id="authToggleLink">Sign Up</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Application -->
+        <div class="app-container" id="appContainer">
+            <div class="navbar">
+                <div class="logo-section">
+                    <div class="logo">LS</div>
+                    <div class="brand-name">Light Skai</div>
+                </div>
+                <div class="nav-right">
+                    <div class="user-info">
+                        <span class="user-email" id="userEmail"></span>
+                    </div>
+                    <button class="settings-btn" id="settingsBtn">⚙️ Settings</button>
+                    <button class="help-btn">Help & Support</button>
+                    <button class="logout-btn" id="logoutBtn">Logout</button>
+                    <div class="version">v2.4.1</div>
+                </div>
+            </div>
+
+            <div class="container">
+                <div class="page-header">
+                    <h1 class="page-title">Meeting Intelligence Platform</h1>
+                    <p class="page-subtitle">Upload your meeting notes or transcriptions to generate a comprehensive report.</p>
+                </div>
+
+                <div class="main-grid">
+                    <div class="sidebar">
+                        <div class="card">
+                            <div class="card-header">
+                                Report Options
+                                <div class="info-icon" title="Select which sections to include in your report">i</div>
+                            </div>
+                            <div class="select-all">
+                                <input type="checkbox" id="selectAll" checked>
+                                <label for="selectAll">Select All</label>
+                            </div>
+                            <div class="checkbox-group" id="reportOptionsContainer">
+                                <div style="padding: 20px; text-align: center; color: #64748b;">Loading options...</div>
+                            </div>
+                            <div class="error-message" id="optionsError"></div>
+                        </div>
+                    </div>
+
+                    <div class="main-content">
+                        <div class="card">
+                            <div class="card-header">
+                                Meeting Type
+                                <div class="info-icon" title="Select your meeting type and industry">i</div>
+                            </div>
+                            
+                            <div class="selector-group">
+                                <label class="selector-label">Meeting Type</label>
+                                <select class="industry-select" id="meetingTypeSelect">
+                                    <option value="">Loading...</option>
+                                </select>
+                            </div>
+
+                            <div class="selector-group">
+                                <label class="selector-label">Methodology & Framework</label>
+                                <select class="industry-select" id="methodologySelect">
+                                    <option value="">Loading...</option>
+                                </select>
+                            </div>
+
+                            <div class="selector-group">
+                                <label class="selector-label">Industry</label>
+                                <select class="industry-select" id="industrySelect">
+                                    <option value="">Loading...</option>
+                                </select>
+                            </div>
+                            <div class="error-message" id="selectorsError"></div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                Upload File
+                            </div>
+                            <div class="upload-section">
+                                <div class="upload-area" id="uploadArea">
+                                    <div class="upload-icon">
+                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="upload-text">Drag and drop your file here</div>
+                                    <div class="upload-subtext">Supported formats: PDF, TXT, DOCX • Max size: 1GB</div>
+                                    <button class="browse-btn" type="button" onclick="document.getElementById('fileInput').click()">
+                                        Browse Files
+                                    </button>
+                                    <input type="file" id="fileInput" class="file-input" accept=".pdf,.txt,.docx">
+                                </div>
+                                <div class="file-info" id="fileInfo">
+                                    <div class="file-details">
+                                        <span class="file-name" id="fileName"></span>
+                                        <span class="file-size" id="fileSize"></span>
+                                    </div>
+                                    <button class="remove-file" id="removeFile">×</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <button class="run-btn" id="runBtn" disabled>Generate Report</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Panel -->
+        <div class="admin-panel" id="adminPanel">
+            <div class="admin-panel-content">
+                <div class="admin-success-message" id="adminSuccessMessage">
+                    ✓ Default settings saved successfully!
+                </div>
+
+                <div class="admin-header">
+                    <h2 class="admin-title">User Settings</h2>
+                    <button class="admin-close" id="adminClose">×</button>
+                </div>
+
+                <div class="admin-section">
+                    <div class="admin-section-title">
+                        <div class="admin-section-icon">📋</div>
+                        Default Report Options
+                    </div>
+                    <p class="admin-description">
+                        Set which report options should be checked by default and their order. Drag to reorder.
+                    </p>
+                    <div class="admin-checkbox-group" id="adminReportOptions">
+                        <!-- Will be populated dynamically -->
+                    </div>
+                </div>
+
+                <div class="admin-section">
+                    <div class="admin-section-title">
+                        <div class="admin-section-icon">📁</div>
+                        Default Dropdown Selections
+                    </div>
+                    <p class="admin-description">
+                        Set your default selections for meeting type, methodology, and industry.
+                    </p>
+                    <div class="admin-select-group">
+                        <div class="admin-select-item">
+                            <label class="admin-select-label">Default Meeting Type</label>
+                            <select class="industry-select" id="adminMeetingType">
+                                <option value="">None (User will select)</option>
+                            </select>
+                        </div>
+                        <div class="admin-select-item">
+                            <label class="admin-select-label">Default Methodology</label>
+                            <select class="industry-select" id="adminMethodology">
+                                <option value="">None (User will select)</option>
+                            </select>
+                        </div>
+                        <div class="admin-select-item">
+                            <label class="admin-select-label">Default Industry</label>
+                            <select class="industry-select" id="adminIndustry">
+                                <option value="">None (User will select)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-actions">
+                    <button class="admin-btn admin-btn-reset" id="adminResetBtn">Reset to System Defaults</button>
+                    <button class="admin-btn admin-btn-secondary" id="adminCancelBtn">Cancel</button>
+                    <button class="admin-btn admin-btn-primary" id="adminSaveBtn">Save Defaults</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        // Configuration
+        const CONFIG = {
+            SUPABASE_URL: 'https://khhrkgevrhtdlwcdxvbs.supabase.co',
+            SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtoaHJrZ2V2cmh0ZGx3Y2R4dmJzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI4NzA5NTIsImV4cCI6MjA3ODQ0Njk1Mn0.wqd6Uds-7pEr0p1MCrZKRzLzqOPS7ziZO8eGNs_G59c',
+            MAX_FILE_SIZE: 1024 * 1024 * 1024 // 1GB
+        };
+
+        // Initialize Supabase client
+        const { createClient } = supabase;
+        const supabaseClient = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+
+        // State Management
+        const state = {
+            currentUser: null,
+            currentFile: null,
+            reportOptions: [],
+            meetingTypes: [],
+            frameworks: [],
+            industries: [],
+            isLoginMode: true,
+            userPreferences: {
+                reportOptionsOrder: [],
+                reportOptionsChecked: [],
+                selectedMeetingType: '',
+                selectedMethodology: '',
+                selectedIndustry: ''
+            },
+            defaultSettings: {
+                reportOptionsOrder: [],
+                reportOptionsChecked: [],
+                defaultMeetingType: '',
+                defaultMethodology: '',
+                defaultIndustry: ''
+            }
+        };
+
+        // DOM Elements
+        const elements = {
+            // Auth elements
+            authContainer: document.getElementById('authContainer'),
+            authForm: document.getElementById('authForm'),
+            authTitle: document.getElementById('authTitle'),
+            authSubtitle: document.getElementById('authSubtitle'),
+            authSubmitBtn: document.getElementById('authSubmitBtn'),
+            authToggleText: document.getElementById('authToggleText'),
+            authToggleLink: document.getElementById('authToggleLink'),
+            authMessage: document.getElementById('authMessage'),
+            emailInput: document.getElementById('emailInput'),
+            passwordInput: document.getElementById('passwordInput'),
+            
+            // App elements
+            appContainer: document.getElementById('appContainer'),
+            userEmail: document.getElementById('userEmail'),
+            logoutBtn: document.getElementById('logoutBtn'),
+            settingsBtn: document.getElementById('settingsBtn'),
+            uploadArea: document.getElementById('uploadArea'),
+            fileInput: document.getElementById('fileInput'),
+            fileInfo: document.getElementById('fileInfo'),
+            fileName: document.getElementById('fileName'),
+            fileSize: document.getElementById('fileSize'),
+            removeFile: document.getElementById('removeFile'),
+            runBtn: document.getElementById('runBtn'),
+            selectAll: document.getElementById('selectAll'),
+            reportOptionsContainer: document.getElementById('reportOptionsContainer'),
+            meetingTypeSelect: document.getElementById('meetingTypeSelect'),
+            methodologySelect: document.getElementById('methodologySelect'),
+            industrySelect: document.getElementById('industrySelect'),
+            optionsError: document.getElementById('optionsError'),
+            selectorsError: document.getElementById('selectorsError'),
+            
+            // Admin panel elements
+            adminPanel: document.getElementById('adminPanel'),
+            adminClose: document.getElementById('adminClose'),
+            adminReportOptions: document.getElementById('adminReportOptions'),
+            adminMeetingType: document.getElementById('adminMeetingType'),
+            adminMethodology: document.getElementById('adminMethodology'),
+            adminIndustry: document.getElementById('adminIndustry'),
+            adminSaveBtn: document.getElementById('adminSaveBtn'),
+            adminCancelBtn: document.getElementById('adminCancelBtn'),
+            adminResetBtn: document.getElementById('adminResetBtn'),
+            adminSuccessMessage: document.getElementById('adminSuccessMessage')
+        };
+
+        // User Preferences Storage
+        const UserPreferences = {
+            STORAGE_KEY_PREFIX: 'mip_prefs_',
+            DEFAULT_STORAGE_KEY_PREFIX: 'mip_defaults_',
+
+            getStorageKey() {
+                return `${this.STORAGE_KEY_PREFIX}${state.currentUser?.id || 'guest'}`;
+            },
+
+            getDefaultStorageKey() {
+                return `${this.DEFAULT_STORAGE_KEY_PREFIX}${state.currentUser?.id || 'guest'}`;
+            },
+
+            async save() {
+                if (!state.currentUser) return;
+
+                // Collect current preferences
+                const prefs = {
+                    reportOptionsOrder: this.getReportOptionsOrder(),
+                    reportOptionsChecked: this.getReportOptionsChecked(),
+                    selectedMeetingType: elements.meetingTypeSelect.value,
+                    selectedMethodology: elements.methodologySelect.value,
+                    selectedIndustry: elements.industrySelect.value,
+                    lastUpdated: new Date().toISOString()
+                };
+
+                // Save to storage
+                try {
+                    await window.storage.set(this.getStorageKey(), JSON.stringify(prefs));
+                    console.log('Preferences saved successfully');
+                } catch (error) {
+                    console.error('Error saving preferences:', error);
+                }
+            },
+
+            async load() {
+                if (!state.currentUser) return null;
+
+                try {
+                    const result = await window.storage.get(this.getStorageKey());
+                    if (result && result.value) {
+                        const prefs = JSON.parse(result.value);
+                        state.userPreferences = prefs;
+                        return prefs;
+                    }
+                } catch (error) {
+                    console.error('Error loading preferences:', error);
+                }
+                return null;
+            },
+
+            async saveDefaults(defaults) {
+                if (!state.currentUser) {
+                    console.error('No user logged in');
+                    return false;
+                }
+
+                const defaultSettings = {
+                    reportOptionsOrder: defaults.reportOptionsOrder || [],
+                    reportOptionsChecked: defaults.reportOptionsChecked || [],
+                    defaultMeetingType: defaults.defaultMeetingType || '',
+                    defaultMethodology: defaults.defaultMethodology || '',
+                    defaultIndustry: defaults.defaultIndustry || '',
+                    lastUpdated: new Date().toISOString()
+                };
+
+                console.log('Attempting to save defaults:', defaultSettings);
+
+                try {
+                    const storageKey = this.getDefaultStorageKey();
+                    console.log('Storage key:', storageKey);
+                    
+                    const result = await window.storage.set(storageKey, JSON.stringify(defaultSettings));
+                    console.log('Storage result:', result);
+                    
+                    if (result) {
+                        state.defaultSettings = defaultSettings;
+                        console.log('Default settings saved successfully to state');
+                        return true;
+                    } else {
+                        console.error('Storage returned null/false');
+                        return false;
+                    }
+                } catch (error) {
+                    console.error('Error saving default settings:', error);
+                    return false;
+                }
+            },
+
+            async loadDefaults() {
+                if (!state.currentUser) return null;
+
+                try {
+                    const result = await window.storage.get(this.getDefaultStorageKey());
+                    if (result && result.value) {
+                        const defaults = JSON.parse(result.value);
+                        state.defaultSettings = defaults;
+                        return defaults;
+                    }
+                } catch (error) {
+                    console.error('Error loading default settings:', error);
+                }
+                return null;
+            },
+
+            async deleteDefaults() {
+                if (!state.currentUser) return;
+
+                try {
+                    await window.storage.delete(this.getDefaultStorageKey());
+                    state.defaultSettings = {
+                        reportOptionsOrder: [],
+                        reportOptionsChecked: [],
+                        defaultMeetingType: '',
+                        defaultMethodology: '',
+                        defaultIndustry: ''
+                    };
+                    console.log('Default settings deleted');
+                } catch (error) {
+                    console.error('Error deleting default settings:', error);
+                }
+            },
+
+            async clear() {
+                if (!state.currentUser) return;
+
+                try {
+                    await window.storage.delete(this.getStorageKey());
+                    console.log('Preferences cleared');
+                } catch (error) {
+                    console.error('Error clearing preferences:', error);
+                }
+            },
+
+            getReportOptionsOrder() {
+                const items = elements.reportOptionsContainer.querySelectorAll('.checkbox-item');
+                return Array.from(items).map(item => {
+                    const label = item.querySelector('label');
+                    return label ? label.textContent : '';
+                }).filter(Boolean);
+            },
+
+            getReportOptionsChecked() {
+                const items = elements.reportOptionsContainer.querySelectorAll('.checkbox-item');
+                const checked = [];
+                items.forEach(item => {
+                    const checkbox = item.querySelector('.report-option-checkbox');
+                    const label = item.querySelector('label');
+                    if (checkbox && checkbox.checked && label) {
+                        checked.push(label.textContent);
+                    }
+                });
+                return checked;
+            },
+
+            applyReportOptionsOrder(savedOrder) {
+                if (!savedOrder || savedOrder.length === 0) return;
+
+                const container = elements.reportOptionsContainer;
+                const items = Array.from(container.querySelectorAll('.checkbox-item'));
+
+                // Create a map of label text to item element
+                const itemMap = new Map();
+                items.forEach(item => {
+                    const label = item.querySelector('label');
+                    if (label) {
+                        itemMap.set(label.textContent, item);
+                    }
+                });
+
+                // Clear container
+                container.innerHTML = '';
+
+                // Re-append items in saved order
+                savedOrder.forEach(labelText => {
+                    const item = itemMap.get(labelText);
+                    if (item) {
+                        container.appendChild(item);
+                        itemMap.delete(labelText);
+                    }
+                });
+
+                // Append any remaining items that weren't in saved order
+                itemMap.forEach(item => {
+                    container.appendChild(item);
+                });
+
+                // Reinitialize drag and drop
+                DragDrop.init();
+            },
+
+            applyReportOptionsChecked(checkedOptions) {
+                if (!checkedOptions || checkedOptions.length === 0) {
+                    // If no saved preferences, check all by default
+                    const checkboxes = document.querySelectorAll('.report-option-checkbox');
+                    checkboxes.forEach(cb => cb.checked = true);
+                    elements.selectAll.checked = true;
+                    return;
+                }
+
+                const items = elements.reportOptionsContainer.querySelectorAll('.checkbox-item');
+                let hasAnyChecked = false;
+                
+                items.forEach(item => {
+                    const checkbox = item.querySelector('.report-option-checkbox');
+                    const label = item.querySelector('label');
+                    if (checkbox && label) {
+                        const labelText = label.textContent.trim();
+                        const shouldBeChecked = checkedOptions.some(opt => opt.trim() === labelText);
+                        checkbox.checked = shouldBeChecked;
+                        if (shouldBeChecked) hasAnyChecked = true;
+                    }
+                });
+
+                // If nothing was checked, check all as fallback
+                if (!hasAnyChecked) {
+                    const checkboxes = document.querySelectorAll('.report-option-checkbox');
+                    checkboxes.forEach(cb => cb.checked = true);
+                }
+
+                // Update select all checkbox
+                this.updateSelectAllState();
+            },
+
+            applySelectValues(prefs) {
+                if (prefs.selectedMeetingType) {
+                    elements.meetingTypeSelect.value = prefs.selectedMeetingType;
+                }
+                if (prefs.selectedMethodology) {
+                    elements.methodologySelect.value = prefs.selectedMethodology;
+                }
+                if (prefs.selectedIndustry) {
+                    elements.industrySelect.value = prefs.selectedIndustry;
+                }
+            },
+
+            updateSelectAllState() {
+                const checkboxes = document.querySelectorAll('.report-option-checkbox');
+                const allChecked = Array.from(checkboxes).every(c => c.checked);
+                const someChecked = Array.from(checkboxes).some(c => c.checked);
+                elements.selectAll.checked = allChecked;
+                elements.selectAll.indeterminate = someChecked && !allChecked;
+            }
+        };
+
+        // Admin Panel Management
+        const AdminPanel = {
+            open() {
+                elements.adminPanel.classList.add('active');
+                this.loadCurrentSettings();
+            },
+
+            close() {
+                elements.adminPanel.classList.remove('active');
+                this.hideSuccessMessage();
+            },
+
+            async loadCurrentSettings() {
+                // Load default settings or current settings
+                const defaults = await UserPreferences.loadDefaults();
+                
+                // Populate report options
+                this.renderReportOptions(defaults);
+                
+                // Populate dropdown menus
+                this.populateDropdowns(defaults);
+            },
+
+            renderReportOptions(defaults) {
+                elements.adminReportOptions.innerHTML = '';
+                
+                let optionsToRender = state.reportOptions;
+                
+                // If there are saved defaults, reorder based on them
+                if (defaults && defaults.reportOptionsOrder && defaults.reportOptionsOrder.length > 0) {
+                    const orderMap = new Map();
+                    state.reportOptions.forEach(opt => {
+                        orderMap.set(opt.Report_Option, opt);
+                    });
+                    
+                    optionsToRender = [];
+                    defaults.reportOptionsOrder.forEach(optName => {
+                        if (orderMap.has(optName)) {
+                            optionsToRender.push(orderMap.get(optName));
+                            orderMap.delete(optName);
+                        }
+                    });
+                    
+                    // Add any remaining options
+                    orderMap.forEach(opt => optionsToRender.push(opt));
+                }
+
+                optionsToRender.forEach((item, index) => {
+                    const isChecked = !defaults || 
+                        !defaults.reportOptionsChecked || 
+                        defaults.reportOptionsChecked.length === 0 ||
+                        defaults.reportOptionsChecked.includes(item.Report_Option);
+                    
+                    const div = document.createElement('div');
+                    div.className = 'admin-checkbox-item';
+                    div.draggable = true;
+                    div.dataset.index = index;
+                    div.innerHTML = `
+                        <span class="drag-handle">⋮⋮</span>
+                        <input type="checkbox" id="adminOption${index}" class="admin-report-checkbox" ${isChecked ? 'checked' : ''}>
+                        <label for="adminOption${index}">${item.Report_Option}</label>
+                    `;
+                    elements.adminReportOptions.appendChild(div);
+                });
+
+                this.initDragDrop();
+            },
+
+            populateDropdowns(defaults) {
+                // Meeting Type
+                elements.adminMeetingType.innerHTML = '<option value="">None (User will select)</option>';
+                state.meetingTypes.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.Type;
+                    option.textContent = item.Type;
+                    if (defaults && defaults.defaultMeetingType === item.Type) {
+                        option.selected = true;
+                    }
+                    elements.adminMeetingType.appendChild(option);
+                });
+
+                // Methodology
+                elements.adminMethodology.innerHTML = '<option value="">None (User will select)</option>';
+                state.frameworks.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.Method;
+                    option.textContent = item.Method;
+                    if (defaults && defaults.defaultMethodology === item.Method) {
+                        option.selected = true;
+                    }
+                    elements.adminMethodology.appendChild(option);
+                });
+
+                // Industry
+                elements.adminIndustry.innerHTML = '<option value="">None (User will select)</option>';
+                state.industries.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.Industry_Name;
+                    option.textContent = item.Industry_Name;
+                    if (defaults && defaults.defaultIndustry === item.Industry_Name) {
+                        option.selected = true;
+                    }
+                    elements.adminIndustry.appendChild(option);
+                });
+            },
+
+            initDragDrop() {
+                const items = elements.adminReportOptions.querySelectorAll('.admin-checkbox-item');
+                items.forEach(item => {
+                    item.addEventListener('dragstart', this.handleDragStart.bind(this));
+                    item.addEventListener('dragend', this.handleDragEnd.bind(this));
+                    item.addEventListener('dragover', this.handleDragOver.bind(this));
+                    item.addEventListener('drop', this.handleDrop.bind(this));
+                });
+            },
+
+            draggedElement: null,
+
+            handleDragStart(e) {
+                this.draggedElement = e.target;
+                e.target.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+            },
+
+            handleDragEnd(e) {
+                e.target.classList.remove('dragging');
+            },
+
+            handleDragOver(e) {
+                if (e.preventDefault) {
+                    e.preventDefault();
+                }
+                e.dataTransfer.dropEffect = 'move';
+
+                const afterElement = this.getDragAfterElement(elements.adminReportOptions, e.clientY);
+                const draggable = this.draggedElement;
+
+                if (afterElement == null) {
+                    elements.adminReportOptions.appendChild(draggable);
+                } else {
+                    elements.adminReportOptions.insertBefore(draggable, afterElement);
+                }
+
+                return false;
+            },
+
+            handleDrop(e) {
+                if (e.stopPropagation) {
+                    e.stopPropagation();
+                }
+                return false;
+            },
+
+            getDragAfterElement(container, y) {
+                const draggableElements = [...container.querySelectorAll('.admin-checkbox-item:not(.dragging)')];
+
+                return draggableElements.reduce((closest, child) => {
+                    const box = child.getBoundingClientRect();
+                    const offset = y - box.top - box.height / 2;
+
+                    if (offset < 0 && offset > closest.offset) {
+                        return { offset: offset, element: child };
+                    } else {
+                        return closest;
+                    }
+                }, { offset: Number.NEGATIVE_INFINITY }).element;
+            },
+
+            async saveDefaults() {
+                // Show confirmation dialog
+                const confirmed = confirm('Save these settings as your defaults?\n\nThese settings will be applied whenever you start a new session.');
+                
+                if (!confirmed) {
+                    return;
+                }
+
+                // Disable save button during save
+                elements.adminSaveBtn.disabled = true;
+                elements.adminSaveBtn.textContent = 'Saving...';
+
+                // Get report options order
+                const items = elements.adminReportOptions.querySelectorAll('.admin-checkbox-item');
+                const reportOptionsOrder = [];
+                const reportOptionsChecked = [];
+
+                items.forEach(item => {
+                    const checkbox = item.querySelector('.admin-report-checkbox');
+                    const label = item.querySelector('label');
+                    if (label) {
+                        const optionText = label.textContent.trim();
+                        reportOptionsOrder.push(optionText);
+                        if (checkbox && checkbox.checked) {
+                            reportOptionsChecked.push(optionText);
+                        }
+                    }
+                });
+
+                const defaults = {
+                    reportOptionsOrder,
+                    reportOptionsChecked,
+                    defaultMeetingType: elements.adminMeetingType.value,
+                    defaultMethodology: elements.adminMethodology.value,
+                    defaultIndustry: elements.adminIndustry.value
+                };
+
+                console.log('Saving defaults:', defaults);
+
+                const success = await UserPreferences.saveDefaults(defaults);
+                
+                // Re-enable button
+                elements.adminSaveBtn.disabled = false;
+                elements.adminSaveBtn.textContent = 'Save Defaults';
+                
+                if (success) {
+                    this.showSuccessMessage();
+                    
+                    // Apply these defaults to the current view
+                    await this.applyDefaultsToMain();
+                    
+                    setTimeout(() => {
+                        this.close();
+                    }, 2000);
+                } else {
+                    alert('Failed to save default settings. Please try again.');
+                }
+            },
+
+            async applyDefaultsToMain() {
+                const defaults = state.defaultSettings;
+                
+                console.log('Applying defaults to main screen:', defaults);
+                
+                // Apply to main screen
+                if (defaults.reportOptionsOrder && defaults.reportOptionsOrder.length > 0) {
+                    UserPreferences.applyReportOptionsOrder(defaults.reportOptionsOrder);
+                }
+                
+                // Apply checked state
+                if (defaults.reportOptionsChecked && defaults.reportOptionsChecked.length > 0) {
+                    UserPreferences.applyReportOptionsChecked(defaults.reportOptionsChecked);
+                } else {
+                    // If no specific checked items, check all
+                    const checkboxes = document.querySelectorAll('.report-option-checkbox');
+                    checkboxes.forEach(cb => cb.checked = true);
+                    elements.selectAll.checked = true;
+                }
+
+                // Apply dropdown defaults
+                if (defaults.defaultMeetingType) {
+                    elements.meetingTypeSelect.value = defaults.defaultMeetingType;
+                }
+                if (defaults.defaultMethodology) {
+                    elements.methodologySelect.value = defaults.defaultMethodology;
+                }
+                if (defaults.defaultIndustry) {
+                    elements.industrySelect.value = defaults.defaultIndustry;
+                }
+
+                // Save as current preferences
+                await UserPreferences.save();
+                
+                console.log('Defaults applied and saved to preferences');
+            },
+
+            async resetToSystemDefaults() {
+                if (confirm('Are you sure you want to reset to system defaults? This will clear all your custom default settings.')) {
+                    await UserPreferences.deleteDefaults();
+                    
+                    // Reload with system defaults
+                    this.renderReportOptions(null);
+                    this.populateDropdowns(null);
+                    
+                    // Apply to main screen
+                    const checkboxes = document.querySelectorAll('.report-option-checkbox');
+                    checkboxes.forEach(cb => cb.checked = true);
+                    elements.selectAll.checked = true;
+                    
+                    elements.meetingTypeSelect.value = '';
+                    elements.methodologySelect.value = '';
+                    elements.industrySelect.value = '';
+                    
+                    await UserPreferences.save();
+                    
+                    this.showSuccessMessage();
+                }
+            },
+
+            showSuccessMessage() {
+                elements.adminSuccessMessage.classList.add('active');
+                setTimeout(() => {
+                    this.hideSuccessMessage();
+                }, 3000);
+            },
+
+            hideSuccessMessage() {
+                elements.adminSuccessMessage.classList.remove('active');
+            }
+        };
+
+        // Authentication Service
+        const Auth = {
+            async checkSession() {
+                try {
+                    const { data: { session } } = await supabaseClient.auth.getSession();
+                    if (session) {
+                        state.currentUser = session.user;
+                        this.showApp();
+                        return true;
+                    } else {
+                        this.showAuth();
+                        return false;
+                    }
+                } catch (error) {
+                    console.error('Session check error:', error);
+                    this.showAuth();
+                    return false;
+                }
+            },
+
+            async signIn(email, password) {
+                try {
+                    const { data, error } = await supabaseClient.auth.signInWithPassword({
+                        email,
+                        password
+                    });
+
+                    if (error) throw error;
+
+                    state.currentUser = data.user;
+                    UI.showAuthMessage('Successfully signed in!', 'success');
+                    
+                    setTimeout(() => {
+                        this.showApp();
+                    }, 1000);
+
+                    return { success: true };
+                } catch (error) {
+                    console.error('Sign in error:', error);
+                    UI.showAuthMessage(error.message || 'Failed to sign in. Please check your credentials.', 'error');
+                    return { success: false, error };
+                }
+            },
+
+            async signUp(email, password) {
+                try {
+                    const { data, error } = await supabaseClient.auth.signUp({
+                        email,
+                        password
+                    });
+
+                    if (error) throw error;
+
+                    UI.showAuthMessage('Account created! Please check your email to verify your account.', 'success');
+                    
+                    setTimeout(() => {
+                        this.toggleAuthMode();
+                    }, 3000);
+
+                    return { success: true };
+                } catch (error) {
+                    console.error('Sign up error:', error);
+                    UI.showAuthMessage(error.message || 'Failed to create account.', 'error');
+                    return { success: false, error };
+                }
+            },
+
+            async signOut() {
+                try {
+                    const { error } = await supabaseClient.auth.signOut();
+                    if (error) throw error;
+
+                    state.currentUser = null;
+                    this.showAuth();
+                    FileHandler.removeFile();
+                } catch (error) {
+                    console.error('Sign out error:', error);
+                    alert('Failed to sign out. Please try again.');
+                }
+            },
+
+            showAuth() {
+                elements.authContainer.classList.add('active');
+                elements.appContainer.classList.remove('active');
+            },
+
+            showApp() {
+                elements.authContainer.classList.remove('active');
+                elements.appContainer.classList.add('active');
+                elements.userEmail.textContent = state.currentUser?.email || '';
+                DataLoader.loadAll();
+            },
+
+            toggleAuthMode() {
+                state.isLoginMode = !state.isLoginMode;
+                
+                if (state.isLoginMode) {
+                    elements.authTitle.textContent = 'Welcome Back';
+                    elements.authSubtitle.textContent = 'Sign in to access your meeting intelligence platform';
+                    elements.authSubmitBtn.textContent = 'Sign In';
+                    elements.authToggleText.textContent = "Don't have an account?";
+                    elements.authToggleLink.textContent = 'Sign Up';
+                } else {
+                    elements.authTitle.textContent = 'Create Account';
+                    elements.authSubtitle.textContent = 'Sign up to start using the meeting intelligence platform';
+                    elements.authSubmitBtn.textContent = 'Sign Up';
+                    elements.authToggleText.textContent = 'Already have an account?';
+                    elements.authToggleLink.textContent = 'Sign In';
+                }
+                
+                UI.hideAuthMessage();
+                elements.authForm.reset();
+            }
+        };
+
+        // API Service with Authentication
+        const API = {
+            async fetchData(table, selectFields = '*', orderBy = null) {
+                try {
+                    const { data: { session } } = await supabaseClient.auth.getSession();
+                    
+                    let query = supabaseClient
+                        .from(table)
+                        .select(selectFields);
+                    
+                    if (orderBy) {
+                        query = query.order(orderBy, { ascending: true });
+                    }
+
+                    const { data, error } = await query;
+
+                    if (error) throw error;
+                    return data;
+                } catch (error) {
+                    console.error(`Error fetching from ${table}:`, error);
+                    throw error;
+                }
+            },
+
+            async getReportOptions() {
+                return await this.fetchData('report_options_public', 'Report_Option');
+            },
+
+            async getMeetingTypes() {
+                return await this.fetchData('meetingtype_public', 'Type', 'Type');
+            },
+
+            async getFrameworks() {
+                return await this.fetchData('framework_public', 'Method', 'Method');
+            },
+
+            async getIndustries() {
+                return await this.fetchData('industry_public', 'Industry_Name', 'Industry_Name');
+            }
+        };
+
+        // UI Handlers
+        const UI = {
+            showError(element, message) {
+                element.textContent = message;
+                element.classList.add('active');
+            },
+
+            hideError(element) {
+                element.classList.remove('active');
+            },
+
+            showAuthMessage(message, type) {
+                elements.authMessage.textContent = message;
+                elements.authMessage.className = `auth-message active ${type}`;
+            },
+
+            hideAuthMessage() {
+                elements.authMessage.classList.remove('active');
+            },
+
+            populateSelect(selectElement, data, textField, defaultText) {
+                selectElement.innerHTML = `<option value="">${defaultText}</option>`;
+                data.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item[textField];
+                    option.textContent = item[textField];
+                    selectElement.appendChild(option);
+                });
+            },
+
+            renderReportOptions(data) {
+                elements.reportOptionsContainer.innerHTML = '';
+                data.forEach((item, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'checkbox-item';
+                    div.draggable = true;
+                    div.dataset.index = index;
+                    div.innerHTML = `
+                        <span class="drag-handle">⋮⋮</span>
+                        <input type="checkbox" id="option${index}" class="report-option-checkbox" checked>
+                        <label for="option${index}">${item.Report_Option}</label>
+                    `;
+                    elements.reportOptionsContainer.appendChild(div);
+                });
+                DragDrop.init();
+            },
+
+            showFileInfo(file) {
+                elements.fileName.textContent = file.name;
+                elements.fileSize.textContent = Utils.formatFileSize(file.size);
+                elements.fileInfo.classList.add('active');
+                elements.uploadArea.classList.add('hidden');
+            },
+
+            hideFileInfo() {
+                elements.fileInfo.classList.remove('active');
+                elements.uploadArea.classList.remove('hidden');
+                elements.fileName.textContent = '';
+                elements.fileSize.textContent = '';
+            },
+
+            updateRunButton() {
+                elements.runBtn.disabled = !state.currentFile;
+            }
+        };
+
+        // Utility Functions
+        const Utils = {
+            formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+            },
+
+            validateFile(file) {
+                const validExtensions = ['.pdf', '.txt', '.docx'];
+                const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+                
+                if (!validExtensions.includes(fileExtension)) {
+                    return { valid: false, error: 'Invalid file type. Please upload PDF, TXT, or DOCX files only.' };
+                }
+                
+                if (file.size > CONFIG.MAX_FILE_SIZE) {
+                    return { valid: false, error: 'File size exceeds 1GB limit.' };
+                }
+                
+                return { valid: true };
+            },
+
+            getSelectedOptions() {
+                // Get options in their current order (after any drag/drop reordering)
+                const items = elements.reportOptionsContainer.querySelectorAll('.checkbox-item');
+                const orderedOptions = [];
+                
+                items.forEach(item => {
+                    const checkbox = item.querySelector('.report-option-checkbox');
+                    const label = item.querySelector('label');
+                    if (checkbox && checkbox.checked && label) {
+                        orderedOptions.push(label.textContent);
+                    }
+                });
+                
+                return orderedOptions;
+            },
+
+            getSelectValue(selectElement) {
+                const index = selectElement.selectedIndex;
+                return index > 0 ? selectElement.options[index].text : 'Not selected';
+            }
+        };
+
+        // File Handler
+        const FileHandler = {
+            handleFile(file) {
+                const validation = Utils.validateFile(file);
+                
+                if (!validation.valid) {
+                    alert(validation.error);
+                    return;
+                }
+
+                state.currentFile = file;
+                UI.showFileInfo(file);
+                UI.updateRunButton();
+            },
+
+            removeFile() {
+                state.currentFile = null;
+                elements.fileInput.value = '';
+                UI.hideFileInfo();
+                UI.updateRunButton();
+            }
+        };
+
+        // Report Generator
+        const ReportGenerator = {
+            generate() {
+                if (!state.currentFile) {
+                    alert('Please upload a file first!');
+                    return;
+                }
+
+                const selectedOptions = Utils.getSelectedOptions();
+                const meetingType = Utils.getSelectValue(elements.meetingTypeSelect);
+                const methodology = Utils.getSelectValue(elements.methodologySelect);
+                const industry = Utils.getSelectValue(elements.industrySelect);
+
+                this.generatePDF(meetingType, methodology, industry, selectedOptions, state.currentFile.name);
+            },
+
+            generatePDF(meetingType, methodology, industry, sections, filename) {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                let y = 20;
+                
+                // Title
+                doc.setFontSize(24);
+                doc.setFont(undefined, 'bold');
+                doc.text('Meeting Intelligence Report', 105, y, { align: 'center' });
+                
+                // Date
+                y += 15;
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'normal');
+                doc.text(new Date().toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                }), 105, y, { align: 'center' });
+                
+                // User info
+                y += 8;
+                doc.text(`Generated by: ${state.currentUser?.email || 'Unknown'}`, 105, y, { align: 'center' });
+                
+                // Configuration Section
+                y += 15;
+                doc.setFontSize(16);
+                doc.setFont(undefined, 'bold');
+                doc.text('Meeting Configuration', 20, y);
+                y += 10;
+                
+                doc.setFontSize(11);
+                doc.setFont(undefined, 'normal');
+                
+                const config = [
+                    { label: 'Meeting Type:', value: meetingType },
+                    { label: 'Methodology & Framework:', value: methodology },
+                    { label: 'Industry:', value: industry },
+                    { label: 'Source File:', value: filename }
+                ];
+
+                config.forEach(item => {
+                    doc.text(item.label, 20, y);
+                    doc.setFont(undefined, 'bold');
+                    doc.text(item.value, 75, y);
+                    doc.setFont(undefined, 'normal');
+                    y += 8;
+                });
+                
+                // Report Sections
+                y += 7;
+                doc.setFontSize(16);
+                doc.setFont(undefined, 'bold');
+                doc.text('Report Sections Included', 20, y);
+                y += 10;
+                
+                doc.setFontSize(11);
+                doc.setFont(undefined, 'normal');
+                
+                sections.forEach((section, index) => {
+                    if (y > 270) {
+                        doc.addPage();
+                        y = 20;
+                    }
+                    doc.text(`${index + 1}. ${section}`, 25, y);
+                    y += 7;
+                });
+                
+                // Footer
+                const pageCount = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= pageCount; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(9);
+                    doc.setFont(undefined, 'normal');
+                    doc.text('Light Skai Meeting Intelligence Platform', 105, 285, { align: 'center' });
+                    doc.text(`Page ${i} of ${pageCount}`, 105, 290, { align: 'center' });
+                }
+                
+                doc.save(`Meeting_Report_${Date.now()}.pdf`);
+            }
+        };
+
+        // Drag and Drop Management
+        const DragDrop = {
+            draggedElement: null,
+            
+            init() {
+                const items = elements.reportOptionsContainer.querySelectorAll('.checkbox-item');
+                items.forEach(item => {
+                    item.addEventListener('dragstart', this.handleDragStart.bind(this));
+                    item.addEventListener('dragend', this.handleDragEnd.bind(this));
+                    item.addEventListener('dragover', this.handleDragOver.bind(this));
+                    item.addEventListener('drop', this.handleDrop.bind(this));
+                    item.addEventListener('dragleave', this.handleDragLeave.bind(this));
+                });
+            },
+
+            handleDragStart(e) {
+                this.draggedElement = e.target;
+                e.target.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/html', e.target.innerHTML);
+            },
+
+            handleDragEnd(e) {
+                e.target.classList.remove('dragging');
+                
+                // Remove all drag-over classes
+                const items = elements.reportOptionsContainer.querySelectorAll('.checkbox-item');
+                items.forEach(item => item.classList.remove('drag-over'));
+            },
+
+            handleDragOver(e) {
+                if (e.preventDefault) {
+                    e.preventDefault();
+                }
+                e.dataTransfer.dropEffect = 'move';
+
+                const afterElement = this.getDragAfterElement(elements.reportOptionsContainer, e.clientY);
+                const draggable = this.draggedElement;
+
+                if (afterElement == null) {
+                    elements.reportOptionsContainer.appendChild(draggable);
+                } else {
+                    elements.reportOptionsContainer.insertBefore(draggable, afterElement);
+                }
+
+                return false;
+            },
+
+            handleDrop(e) {
+                if (e.stopPropagation) {
+                    e.stopPropagation();
+                }
+                e.target.classList.remove('drag-over');
+                return false;
+            },
+
+            handleDragLeave(e) {
+                e.target.classList.remove('drag-over');
+            },
+
+            getDragAfterElement(container, y) {
+                const draggableElements = [...container.querySelectorAll('.checkbox-item:not(.dragging)')];
+
+                return draggableElements.reduce((closest, child) => {
+                    const box = child.getBoundingClientRect();
+                    const offset = y - box.top - box.height / 2;
+
+                    if (offset < 0 && offset > closest.offset) {
+                        return { offset: offset, element: child };
+                    } else {
+                        return closest;
+                    }
+                }, { offset: Number.NEGATIVE_INFINITY }).element;
+            }
+        };
+
+        // Checkbox Management
+        const CheckboxManager = {
+            init() {
+                elements.selectAll.addEventListener('change', this.handleSelectAll.bind(this));
+            },
+
+            handleSelectAll(e) {
+                const checkboxes = document.querySelectorAll('.report-option-checkbox');
+                checkboxes.forEach(cb => cb.checked = e.target.checked);
+            },
+
+            setupCheckboxListeners() {
+                const checkboxes = document.querySelectorAll('.report-option-checkbox');
+                
+                checkboxes.forEach(cb => {
+                    cb.addEventListener('change', () => {
+                        const allChecked = Array.from(checkboxes).every(c => c.checked);
+                        const someChecked = Array.from(checkboxes).some(c => c.checked);
+                        elements.selectAll.checked = allChecked;
+                        elements.selectAll.indeterminate = someChecked && !allChecked;
+                    });
+                });
+            }
+        };
+
+        // Event Listeners Setup
+        const EventListeners = {
+            init() {
+                // Auth events
+                elements.authForm.addEventListener('submit', this.handleAuthSubmit.bind(this));
+                elements.authToggleLink.addEventListener('click', () => Auth.toggleAuthMode());
+                elements.logoutBtn.addEventListener('click', () => Auth.signOut());
+                
+                // Admin panel events
+                elements.settingsBtn.addEventListener('click', () => AdminPanel.open());
+                elements.adminClose.addEventListener('click', () => AdminPanel.close());
+                elements.adminCancelBtn.addEventListener('click', () => AdminPanel.close());
+                elements.adminSaveBtn.addEventListener('click', () => AdminPanel.saveDefaults());
+                elements.adminResetBtn.addEventListener('click', () => AdminPanel.resetToSystemDefaults());
+                
+                // Close admin panel on background click
+                elements.adminPanel.addEventListener('click', (e) => {
+                    if (e.target === elements.adminPanel) {
+                        AdminPanel.close();
+                    }
+                });
+                
+                // File upload events
+                elements.uploadArea.addEventListener('dragover', this.handleDragOver);
+                elements.uploadArea.addEventListener('dragleave', this.handleDragLeave);
+                elements.uploadArea.addEventListener('drop', this.handleDrop);
+                elements.fileInput.addEventListener('change', this.handleFileSelect);
+                elements.removeFile.addEventListener('click', () => FileHandler.removeFile());
+                
+                // Generate button
+                elements.runBtn.addEventListener('click', () => ReportGenerator.generate());
+                
+                // Checkbox management
+                CheckboxManager.init();
+
+                // Save preferences when user makes changes
+                this.setupPreferenceSaving();
+
+                // Listen to auth state changes
+                supabaseClient.auth.onAuthStateChange((event, session) => {
+                    if (event === 'SIGNED_IN') {
+                        state.currentUser = session.user;
+                        Auth.showApp();
+                    } else if (event === 'SIGNED_OUT') {
+                        state.currentUser = null;
+                        Auth.showAuth();
+                    }
+                });
+            },
+
+            setupPreferenceSaving() {
+                // Save preferences when checkboxes change
+                elements.reportOptionsContainer.addEventListener('change', () => {
+                    UserPreferences.save();
+                });
+
+                // Save preferences when select menus change
+                elements.meetingTypeSelect.addEventListener('change', () => {
+                    UserPreferences.save();
+                });
+                elements.methodologySelect.addEventListener('change', () => {
+                    UserPreferences.save();
+                });
+                elements.industrySelect.addEventListener('change', () => {
+                    UserPreferences.save();
+                });
+
+                // Save preferences after drag and drop reordering
+                // We'll debounce this to avoid too many saves during dragging
+                let dragSaveTimeout;
+                elements.reportOptionsContainer.addEventListener('dragend', () => {
+                    clearTimeout(dragSaveTimeout);
+                    dragSaveTimeout = setTimeout(() => {
+                        UserPreferences.save();
+                    }, 500);
+                });
+            },
+
+            async handleAuthSubmit(e) {
+                e.preventDefault();
+                
+                const email = elements.emailInput.value;
+                const password = elements.passwordInput.value;
+
+                elements.authSubmitBtn.disabled = true;
+                UI.hideAuthMessage();
+
+                if (state.isLoginMode) {
+                    await Auth.signIn(email, password);
+                } else {
+                    await Auth.signUp(email, password);
+                }
+
+                elements.authSubmitBtn.disabled = false;
+            },
+
+            handleDragOver(e) {
+                e.preventDefault();
+                elements.uploadArea.classList.add('dragover');
+            },
+
+            handleDragLeave() {
+                elements.uploadArea.classList.remove('dragover');
+            },
+
+            handleDrop(e) {
+                e.preventDefault();
+                elements.uploadArea.classList.remove('dragover');
+                if (e.dataTransfer.files.length > 0) {
+                    FileHandler.handleFile(e.dataTransfer.files[0]);
+                }
+            },
+
+            handleFileSelect(e) {
+                if (e.target.files.length > 0) {
+                    FileHandler.handleFile(e.target.files[0]);
+                }
+            }
+        };
+
+        // Data Loader
+        const DataLoader = {
+            async loadAll() {
+                // Load default settings first
+                const defaults = await UserPreferences.loadDefaults();
+                
+                // Then load preferences
+                const prefs = await UserPreferences.load();
+                
+                // Load all data
+                await Promise.all([
+                    this.loadReportOptions(),
+                    this.loadMeetingTypes(),
+                    this.loadFrameworks(),
+                    this.loadIndustries()
+                ]);
+
+                // Apply saved preferences if they exist, otherwise apply defaults
+                const settingsToApply = prefs || defaults;
+                
+                if (settingsToApply) {
+                    // Apply report options order and checked state
+                    if (settingsToApply.reportOptionsOrder && settingsToApply.reportOptionsOrder.length > 0) {
+                        UserPreferences.applyReportOptionsOrder(settingsToApply.reportOptionsOrder);
+                    }
+                    if (settingsToApply.reportOptionsChecked && settingsToApply.reportOptionsChecked.length > 0) {
+                        UserPreferences.applyReportOptionsChecked(settingsToApply.reportOptionsChecked);
+                    }
+                    
+                    // Apply select menu values (use prefs if available, otherwise defaults)
+                    if (prefs) {
+                        UserPreferences.applySelectValues(prefs);
+                    } else if (defaults) {
+                        const defaultSelectValues = {
+                            selectedMeetingType: defaults.defaultMeetingType || '',
+                            selectedMethodology: defaults.defaultMethodology || '',
+                            selectedIndustry: defaults.defaultIndustry || ''
+                        };
+                        UserPreferences.applySelectValues(defaultSelectValues);
+                    }
+                } else {
+                    // First time user - check all options by default
+                    const checkboxes = document.querySelectorAll('.report-option-checkbox');
+                    checkboxes.forEach(cb => cb.checked = true);
+                    elements.selectAll.checked = true;
+                }
+            },
+
+            async loadReportOptions() {
+                try {
+                    const data = await API.getReportOptions();
+                    state.reportOptions = data;
+                    UI.renderReportOptions(data);
+                    CheckboxManager.setupCheckboxListeners();
+                    UI.hideError(elements.optionsError);
+                } catch (error) {
+                    elements.reportOptionsContainer.innerHTML = '';
+                    UI.showError(elements.optionsError, 'Failed to load report options. Please refresh the page.');
+                }
+            },
+
+            async loadMeetingTypes() {
+                try {
+                    const data = await API.getMeetingTypes();
+                    state.meetingTypes = data;
+                    UI.populateSelect(elements.meetingTypeSelect, data, 'Type', 'Select Meeting Type');
+                } catch (error) {
+                    elements.meetingTypeSelect.innerHTML = '<option value="">Error loading</option>';
+                    UI.showError(elements.selectorsError, 'Failed to load meeting types.');
+                }
+            },
+
+            async loadFrameworks() {
+                try {
+                    const data = await API.getFrameworks();
+                    state.frameworks = data;
+                    UI.populateSelect(elements.methodologySelect, data, 'Method', 'Select Methodology');
+                } catch (error) {
+                    elements.methodologySelect.innerHTML = '<option value="">Error loading</option>';
+                }
+            },
+
+            async loadIndustries() {
+                try {
+                    const data = await API.getIndustries();
+                    state.industries = data;
+                    UI.populateSelect(elements.industrySelect, data, 'Industry_Name', 'Select Industry');
+                } catch (error) {
+                    elements.industrySelect.innerHTML = '<option value="">Error loading</option>';
+                }
+            }
+        };
+
+        // Initialize Application
+        async function initApp() {
+            EventListeners.init();
+            await Auth.checkSession();
+        }
+
+        // Start the application when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
+    </script>
+</body>
+</html>
