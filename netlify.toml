@@ -1,7 +1,3 @@
 [build]
-  command = ""
-  publish = "dev"
-  base = "/"
-
-[build.environment]
-  NODE_VERSION = "18"
+publish = "."
+command = ""
