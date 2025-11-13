@@ -1480,15 +1480,11 @@
             SUPABASE_URL: 'https://khhrkgevrhtdlwcdxvbs.supabase.co',
             SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtoaHJrZ2V2cmh0ZGx3Y2R4dmJzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI4NzA5NTIsImV4cCI6MjA3ODQ0Njk1Mn0.wqd6Uds-7pEr0p1MCrZKRzLzqOPS7ziZO8eGNs_G59c',
             MAX_FILE_SIZE: 1024 * 1024 * 1024, // 1GB
+            PRODUCTION_URL: 'https://lightskai.com',
             // Get the proper redirect URL
             getRedirectUrl() {
-                // Check if we're in an iframe or artifact environment
-                if (window.location.hostname === 'localhost' || window.location.hostname === '') {
-                    // For development or artifact environment, use a placeholder
-                    // You should replace this with your actual production URL
-                    return 'https://your-domain.com'; // CHANGE THIS to your actual domain
-                }
-                return window.location.origin;
+                // Always use production URL for email redirects
+                return this.PRODUCTION_URL;
             }
         };
 
@@ -2288,12 +2284,12 @@
 
                     if (error) throw error;
 
-                    UI.showAuthMessage('Magic link sent! Check your email to sign in.', 'success');
+                    UI.showAuthMessage('If you have an account, a Magic link will be sent within 5 minutes. Check your email to sign in.', 'success');
                     return { success: true };
                 } catch (error) {
                     console.error('Magic link error:', error);
-                    UI.showAuthMessage(error.message || 'Failed to send magic link.', 'error');
-                    return { success: false, error };
+                    UI.showAuthMessage('If you have an account, a Magic link will be sent within 5 minutes. Check your email to sign in.', 'success');
+                    return { success: true };
                 }
             },
 
