@@ -2,5 +2,6 @@
   command = "make all"
   publish = "dev"
   base = "/"
+
 [build.environment]
   NODE_VERSION = "18"
