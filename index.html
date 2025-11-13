@@ -996,18 +996,18 @@
         }
 
         .selector-group {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            gap: 16px;
+            align-items: center;
+            margin-bottom: 16px;
         }
 
         .selector-label {
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 700;
-            color: #6366f1;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            color: #475569;
+            text-align: right;
         }
 
         .industry-select {
@@ -1369,6 +1369,15 @@
             .run-btn {
                 padding: 12px 32px;
                 font-size: 15px;
+            }
+
+            .selector-group {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .selector-label {
+                text-align: left;
             }
         }
     </style>
@@ -2240,7 +2249,8 @@
                 if (defaults && defaults.reportOptionsOrder && defaults.reportOptionsOrder.length > 0) {
                     const orderMap = new Map();
                     state.reportOptions.forEach(opt => {
-                        orderMap.set(opt.Report_Option, opt);
+                        const optionText = opt.report_option || opt.Report_Option;
+                        orderMap.set(optionText, opt);
                     });
                     
                     optionsToRender = [];
@@ -2256,10 +2266,11 @@
                 }
 
                 optionsToRender.forEach((item, index) => {
+                    const optionText = item.report_option || item.Report_Option;
                     const isChecked = !defaults || 
                         !defaults.reportOptionsChecked || 
                         defaults.reportOptionsChecked.length === 0 ||
-                        defaults.reportOptionsChecked.includes(item.Report_Option);
+                        defaults.reportOptionsChecked.includes(optionText);
                     
                     const div = document.createElement('div');
                     div.className = 'admin-checkbox-item';
@@ -2268,7 +2279,7 @@
                     div.innerHTML = `
                         <span class="drag-handle">⋮⋮</span>
                         <input type="checkbox" id="adminOption${index}" class="admin-report-checkbox" ${isChecked ? 'checked' : ''}>
-                        <label for="adminOption${index}">${item.Report_Option}</label>
+                        <label for="adminOption${index}">${optionText}</label>
                     `;
                     elements.adminReportOptions.appendChild(div);
                 });
@@ -2746,7 +2757,9 @@
         const API = {
             async fetchData(table, selectFields = '*', orderBy = null) {
                 try {
+                    console.log(`Fetching from table: ${table}, fields: ${selectFields}`);
                     const { data: { session } } = await supabaseClient.auth.getSession();
+                    console.log('Session status:', session ? 'Active' : 'No session');
                     
                     let query = supabaseClient
                         .from(table)
@@ -2758,7 +2771,12 @@
 
                     const { data, error } = await query;
 
-                    if (error) throw error;
+                    if (error) {
+                        console.error(`Supabase error for ${table}:`, error);
+                        throw error;
+                    }
+                    
+                    console.log(`Data received from ${table}:`, data);
                     return data;
                 } catch (error) {
                     console.error(`Error fetching from ${table}:`, error);
@@ -2767,7 +2785,8 @@
             },
 
             async getReportOptions() {
-                return await this.fetchData('report_options_public', 'Report_Option');
+                console.log('API.getReportOptions called');
+                return await this.fetchData('report_options_public', 'report_option');
             },
 
             async getMeetingTypes() {
@@ -2823,7 +2842,7 @@
                     div.innerHTML = `
                         <span class="drag-handle">⋮⋮</span>
                         <input type="checkbox" id="option${index}" class="report-option-checkbox" checked>
-                        <label for="option${index}">${item.Report_Option}</label>
+                        <label for="option${index}">${item.report_option || item.Report_Option}</label>
                     `;
                     elements.reportOptionsContainer.appendChild(div);
                 });
@@ -3332,12 +3351,22 @@
 
             async loadReportOptions() {
                 try {
+                    console.log('Loading report options...');
                     const data = await API.getReportOptions();
+                    console.log('Report options data received:', data);
+                    
+                    if (!data || data.length === 0) {
+                        console.warn('No report options data returned');
+                        elements.reportOptionsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #ef4444;">No report options available</div>';
+                        return;
+                    }
+                    
                     state.reportOptions = data;
                     UI.renderReportOptions(data);
                     CheckboxManager.setupCheckboxListeners();
                     UI.hideError(elements.optionsError);
                 } catch (error) {
+                    console.error('Error loading report options:', error);
                     elements.reportOptionsContainer.innerHTML = '';
                     UI.showError(elements.optionsError, 'Failed to load report options. Please refresh the page.');
                 }
