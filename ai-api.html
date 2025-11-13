@@ -3203,12 +3203,10 @@
                         const text = await file.text();
                         return text;
                     } else if (fileExtension === 'pdf') {
-                        // For PDF, we'll convert to base64 and send to OpenAI's vision API
-                        // which can read PDFs directly
-                        return null; // Will be handled differently in API call
+                        // PDF will be handled by OpenAI Assistants API
+                        return null;
                     } else if (fileExtension === 'docx') {
-                        // For DOCX, we can't easily extract text in browser
-                        // Will need to send as-is or convert server-side
+                        // DOCX will be handled by OpenAI Assistants API
                         return null;
                     }
                     
@@ -3219,16 +3217,187 @@
                 }
             },
 
-            async fileToBase64(file) {
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                        const base64 = reader.result.split(',')[1];
-                        resolve(base64);
-                    };
-                    reader.onerror = reject;
-                    reader.readAsDataURL(file);
+            async uploadFileToOpenAI(file, apiKey) {
+                console.log('Uploading file to OpenAI:', file.name);
+                
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('purpose', 'assistants');
+                
+                const response = await fetch('https://api.openai.com/v1/files', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: formData
                 });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(`File upload failed: ${error.error?.message || 'Unknown error'}`);
+                }
+                
+                const fileData = await response.json();
+                console.log('File uploaded successfully:', fileData.id);
+                return fileData.id;
+            },
+
+            async createAssistant(apiKey) {
+                console.log('Creating OpenAI Assistant...');
+                
+                const response = await fetch('https://api.openai.com/v1/assistants', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`,
+                        'OpenAI-Beta': 'assistants=v2'
+                    },
+                    body: JSON.stringify({
+                        model: 'gpt-4o',
+                        name: 'Meeting Intelligence Analyzer',
+                        description: 'Analyzes meeting documents and generates reports',
+                        tools: [{ type: 'file_search' }]
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(`Assistant creation failed: ${error.error?.message || 'Unknown error'}`);
+                }
+                
+                const assistant = await response.json();
+                console.log('Assistant created:', assistant.id);
+                return assistant.id;
+            },
+
+            async createThread(apiKey, fileId) {
+                console.log('Creating thread with file...');
+                
+                const response = await fetch('https://api.openai.com/v1/threads', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`,
+                        'OpenAI-Beta': 'assistants=v2'
+                    },
+                    body: JSON.stringify({
+                        messages: [],
+                        tool_resources: {
+                            file_search: {
+                                vector_stores: [{
+                                    file_ids: [fileId]
+                                }]
+                            }
+                        }
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(`Thread creation failed: ${error.error?.message || 'Unknown error'}`);
+                }
+                
+                const thread = await response.json();
+                console.log('Thread created:', thread.id);
+                return thread.id;
+            },
+
+            async addMessageToThread(apiKey, threadId, message) {
+                console.log('Adding message to thread...');
+                
+                const response = await fetch(`https://api.openai.com/v1/threads/${threadId}/messages`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`,
+                        'OpenAI-Beta': 'assistants=v2'
+                    },
+                    body: JSON.stringify({
+                        role: 'user',
+                        content: message
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(`Message creation failed: ${error.error?.message || 'Unknown error'}`);
+                }
+                
+                return await response.json();
+            },
+
+            async runAssistant(apiKey, threadId, assistantId) {
+                console.log('Running assistant...');
+                
+                const response = await fetch(`https://api.openai.com/v1/threads/${threadId}/runs`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`,
+                        'OpenAI-Beta': 'assistants=v2'
+                    },
+                    body: JSON.stringify({
+                        assistant_id: assistantId,
+                        max_completion_tokens: 16000
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(`Run creation failed: ${error.error?.message || 'Unknown error'}`);
+                }
+                
+                return await response.json();
+            },
+
+            async waitForRunCompletion(apiKey, threadId, runId) {
+                console.log('Waiting for run completion...');
+                
+                let attempts = 0;
+                const maxAttempts = 60; // 5 minutes max (5s intervals)
+                
+                while (attempts < maxAttempts) {
+                    const response = await fetch(`https://api.openai.com/v1/threads/${threadId}/runs/${runId}`, {
+                        headers: {
+                            'Authorization': `Bearer ${apiKey}`,
+                            'OpenAI-Beta': 'assistants=v2'
+                        }
+                    });
+                    
+                    const run = await response.json();
+                    console.log('Run status:', run.status);
+                    
+                    if (run.status === 'completed') {
+                        return run;
+                    } else if (run.status === 'failed' || run.status === 'cancelled' || run.status === 'expired') {
+                        throw new Error(`Run ${run.status}: ${run.last_error?.message || 'Unknown error'}`);
+                    }
+                    
+                    // Wait 5 seconds before checking again
+                    await new Promise(resolve => setTimeout(resolve, 5000));
+                    attempts++;
+                }
+                
+                throw new Error('Run timeout: Analysis took too long');
+            },
+
+            async getThreadMessages(apiKey, threadId) {
+                console.log('Getting thread messages...');
+                
+                const response = await fetch(`https://api.openai.com/v1/threads/${threadId}/messages`, {
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'OpenAI-Beta': 'assistants=v2'
+                    }
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(`Failed to get messages: ${error.error?.message || 'Unknown error'}`);
+                }
+                
+                const messages = await response.json();
+                return messages.data;
             },
 
             async runAnalysis(promptText, file = null) {
@@ -3239,7 +3408,7 @@
                 elements.aiResultsDisplay.innerHTML = `
                     <div class="ai-results-loading">
                         <div class="ai-results-spinner"></div>
-                        <div>Analyzing with AI${file ? ' (including uploaded file)' : ''}... This may take a moment.</div>
+                        <div>Analyzing with AI${file ? ' (including uploaded file)' : ''}... This may take a few minutes.</div>
                     </div>
                 `;
 
@@ -3254,89 +3423,155 @@
                         }
                     }
 
-                    let messages = [];
-                    let fileText = null;
+                    let result;
 
                     // Handle file if provided
                     if (file) {
                         const fileExtension = file.name.split('.').pop().toLowerCase();
                         
                         if (fileExtension === 'txt') {
-                            // Extract text from TXT file
-                            fileText = await this.extractTextFromFile(file);
+                            // For TXT files, use regular Chat API
+                            const fileText = await this.extractTextFromFile(file);
                             console.log('Extracted text from TXT file, length:', fileText?.length);
                             
-                            messages = [
-                                {
-                                    role: 'user',
-                                    content: `Here is the document content:\n\n${fileText}\n\n---\n\nBased on the above document, please complete the following analysis:\n\n${promptText}`
-                                }
-                            ];
-                        } else if (fileExtension === 'pdf') {
-                            // For PDF, convert to base64 and use vision API
-                            const base64Data = await this.fileToBase64(file);
-                            console.log('Converted PDF to base64');
+                            const messages = [{
+                                role: 'user',
+                                content: `Here is the document content:\n\n${fileText}\n\n---\n\nBased on the above document, please complete the following analysis:\n\n${promptText}`
+                            }];
+
+                            console.log('Calling OpenAI Chat API...');
                             
-                            // Note: OpenAI's vision API doesn't directly support PDF
-                            // You may need a PDF parsing service or library
-                            throw new Error('PDF file analysis is not yet supported. Please use TXT files or implement a PDF parser.');
-                        } else if (fileExtension === 'docx') {
-                            throw new Error('DOCX file analysis is not yet supported. Please use TXT files or implement a DOCX parser.');
+                            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${state.openAIKey}`
+                                },
+                                body: JSON.stringify({
+                                    model: 'gpt-4o',
+                                    messages: messages,
+                                    temperature: 0.7,
+                                    max_completion_tokens: 16000
+                                })
+                            });
+
+                            if (!response.ok) {
+                                const errorData = await response.json();
+                                throw new Error(errorData.error?.message || 'Failed to get AI response');
+                            }
+
+                            const data = await response.json();
+                            result = data.choices[0].message.content;
+                            
+                        } else if (fileExtension === 'pdf' || fileExtension === 'docx') {
+                            // For PDF/DOCX files, use Assistants API
+                            console.log('Using OpenAI Assistants API for', fileExtension.toUpperCase());
+                            
+                            // Step 1: Upload file
+                            elements.aiResultsDisplay.innerHTML = `
+                                <div class="ai-results-loading">
+                                    <div class="ai-results-spinner"></div>
+                                    <div>Step 1/5: Uploading file...</div>
+                                </div>
+                            `;
+                            const fileId = await this.uploadFileToOpenAI(file, state.openAIKey);
+                            
+                            // Step 2: Create assistant
+                            elements.aiResultsDisplay.innerHTML = `
+                                <div class="ai-results-loading">
+                                    <div class="ai-results-spinner"></div>
+                                    <div>Step 2/5: Creating AI assistant...</div>
+                                </div>
+                            `;
+                            const assistantId = await this.createAssistant(state.openAIKey);
+                            
+                            // Step 3: Create thread with file
+                            elements.aiResultsDisplay.innerHTML = `
+                                <div class="ai-results-loading">
+                                    <div class="ai-results-spinner"></div>
+                                    <div>Step 3/5: Preparing analysis...</div>
+                                </div>
+                            `;
+                            const threadId = await this.createThread(state.openAIKey, fileId);
+                            
+                            // Step 4: Add message
+                            await this.addMessageToThread(
+                                state.openAIKey, 
+                                threadId, 
+                                `Based on the uploaded document, please complete the following analysis:\n\n${promptText}`
+                            );
+                            
+                            // Step 5: Run assistant
+                            elements.aiResultsDisplay.innerHTML = `
+                                <div class="ai-results-loading">
+                                    <div class="ai-results-spinner"></div>
+                                    <div>Step 4/5: Running AI analysis (this may take several minutes)...</div>
+                                </div>
+                            `;
+                            const run = await this.runAssistant(state.openAIKey, threadId, assistantId);
+                            
+                            // Wait for completion
+                            await this.waitForRunCompletion(state.openAIKey, threadId, run.id);
+                            
+                            // Get results
+                            elements.aiResultsDisplay.innerHTML = `
+                                <div class="ai-results-loading">
+                                    <div class="ai-results-spinner"></div>
+                                    <div>Step 5/5: Retrieving results...</div>
+                                </div>
+                            `;
+                            const messages = await this.getThreadMessages(state.openAIKey, threadId);
+                            
+                            // Get the assistant's response (first message is the assistant's reply)
+                            const assistantMessage = messages.find(m => m.role === 'assistant');
+                            if (assistantMessage && assistantMessage.content && assistantMessage.content.length > 0) {
+                                result = assistantMessage.content[0].text.value;
+                            } else {
+                                throw new Error('No response from assistant');
+                            }
+                            
                         } else {
                             throw new Error(`Unsupported file type: ${fileExtension}`);
                         }
                     } else {
-                        // No file, just use the prompt
-                        messages = [
-                            {
-                                role: 'user',
-                                content: promptText
-                            }
-                        ];
+                        // No file, just use the prompt with Chat API
+                        const messages = [{
+                            role: 'user',
+                            content: promptText
+                        }];
+
+                        console.log('Calling OpenAI Chat API...');
+                        
+                        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${state.openAIKey}`
+                            },
+                            body: JSON.stringify({
+                                model: 'gpt-4o',
+                                messages: messages,
+                                temperature: 0.7,
+                                max_completion_tokens: 16000
+                            })
+                        });
+
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.error?.message || 'Failed to get AI response');
+                        }
+
+                        const data = await response.json();
+                        result = data.choices[0].message.content;
                     }
 
-                    console.log('Calling OpenAI API...');
-                    console.log('Message character count:', JSON.stringify(messages).length);
-                    console.log('Estimated word count:', Math.round(JSON.stringify(messages).length / 5));
+                    // Display results
+                    state.aiResults = result;
+                    elements.aiResultsDisplay.innerHTML = result;
+                    elements.copyResultsBtn.style.display = 'inline-flex';
+                    elements.copyResultsBtn.dataset.resultsText = result;
                     
-                    // Call OpenAI API with increased limits
-                    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${state.openAIKey}`
-                        },
-                        body: JSON.stringify({
-                            model: 'gpt-4o',
-                            messages: messages,
-                            temperature: 0.7,
-                            max_completion_tokens: 16000  // GPT-4o max output tokens
-                        })
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        console.error('OpenAI API error:', errorData);
-                        throw new Error(errorData.error?.message || 'Failed to get AI response');
-                    }
-
-                    const data = await response.json();
-                    console.log('OpenAI response received');
-                    console.log('Tokens used:', data.usage);
-
-                    if (data.choices && data.choices.length > 0) {
-                        const result = data.choices[0].message.content;
-                        state.aiResults = result;
-                        
-                        // Display results
-                        elements.aiResultsDisplay.innerHTML = result;
-                        elements.copyResultsBtn.style.display = 'inline-flex';
-                        elements.copyResultsBtn.dataset.resultsText = result;
-                        
-                        return { success: true, result };
-                    } else {
-                        throw new Error('No response from AI');
-                    }
+                    return { success: true, result };
 
                 } catch (error) {
                     console.error('AI Analysis error:', error);
@@ -3346,7 +3581,7 @@
                             <strong>Error:</strong> ${error.message}
                             <br><br>
                             ${error.message.includes('API key') ? 'Please check your API key configuration in Supabase.' : ''}
-                            ${error.message.includes('not yet supported') ? 'Currently only TXT files are supported for AI analysis.' : ''}
+                            ${error.message.includes('File upload') ? 'Please check that your file is valid and under 512MB.' : ''}
                         </div>
                     `;
                     elements.copyResultsBtn.style.display = 'none';
