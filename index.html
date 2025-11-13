@@ -564,6 +564,10 @@
             display: none;
         }
 
+        .admin-section-collapsed-default {
+            /* Sections start collapsed by default */
+        }
+
         .admin-description {
             color: #64748b;
             font-size: 14px;
@@ -846,6 +850,31 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s ease;
+        }
+
+        .card-header:hover {
+            color: #6366f1;
+        }
+
+        .card-header-toggle {
+            font-size: 18px;
+            color: #6366f1;
+            transition: transform 0.3s ease;
+        }
+
+        .card.collapsed .card-header-toggle {
+            transform: rotate(-90deg);
+        }
+
+        .card-content {
+            display: block;
+        }
+
+        .card.collapsed .card-content {
+            display: none;
         }
 
         .info-icon {
@@ -1521,7 +1550,7 @@
                 </div>
 
                 <!-- Change Password Section -->
-                <div class="admin-section">
+                <div class="admin-section collapsed">
                     <div class="admin-section-header" onclick="this.parentElement.classList.toggle('collapsed')">
                         <div class="admin-section-header-left">
                             <div class="admin-section-icon">🔐</div>
@@ -1534,10 +1563,6 @@
                             Update your account password. Make sure to use a strong, unique password.
                         </p>
                         <div class="password-input-group">
-                            <div class="form-group">
-                                <label class="form-label">Current Password</label>
-                                <input type="password" class="form-input" id="adminCurrentPassword" placeholder="Enter current password">
-                            </div>
                             <div class="form-group">
                                 <label class="form-label">New Password</label>
                                 <input type="password" class="form-input" id="adminNewPassword" placeholder="Enter new password">
@@ -1573,7 +1598,7 @@
                 </div>
 
                 <!-- Default Report Options Section -->
-                <div class="admin-section">
+                <div class="admin-section collapsed">
                     <div class="admin-section-header" onclick="this.parentElement.classList.toggle('collapsed')">
                         <div class="admin-section-header-left">
                             <div class="admin-section-icon">📋</div>
@@ -1592,7 +1617,7 @@
                 </div>
 
                 <!-- Default Dropdown Selections Section -->
-                <div class="admin-section">
+                <div class="admin-section collapsed">
                     <div class="admin-section-header" onclick="this.parentElement.classList.toggle('collapsed')">
                         <div class="admin-section-header-left">
                             <div class="admin-section-icon">📁</div>
@@ -1737,7 +1762,6 @@
             adminSuccessCloseBtn: document.getElementById('adminSuccessCloseBtn'),
             
             // Password change elements
-            adminCurrentPassword: document.getElementById('adminCurrentPassword'),
             adminNewPassword: document.getElementById('adminNewPassword'),
             adminConfirmPassword: document.getElementById('adminConfirmPassword'),
             adminChangePasswordBtn: document.getElementById('adminChangePasswordBtn'),
@@ -2092,7 +2116,6 @@
             },
 
             clearPasswordFields() {
-                if (elements.adminCurrentPassword) elements.adminCurrentPassword.value = '';
                 if (elements.adminNewPassword) elements.adminNewPassword.value = '';
                 if (elements.adminConfirmPassword) elements.adminConfirmPassword.value = '';
                 if (elements.passwordStrengthBar) {
@@ -2141,12 +2164,11 @@
             },
 
             async changePassword() {
-                const currentPassword = elements.adminCurrentPassword.value;
                 const newPassword = elements.adminNewPassword.value;
                 const confirmPassword = elements.adminConfirmPassword.value;
 
                 // Validation
-                if (!currentPassword || !newPassword || !confirmPassword) {
+                if (!newPassword || !confirmPassword) {
                     UI.showAuthMessage('Please fill in all password fields.', 'error');
                     return;
                 }
@@ -2166,24 +2188,15 @@
                     return;
                 }
 
+                // Confirm password change
+                const confirmed = confirm('Are you sure you want to change your password?');
+                if (!confirmed) return;
+
                 // Disable button during update
                 elements.adminChangePasswordBtn.disabled = true;
                 elements.adminChangePasswordBtn.textContent = 'Updating...';
 
                 try {
-                    // First, verify current password by attempting to sign in
-                    const { error: signInError } = await supabaseClient.auth.signInWithPassword({
-                        email: state.currentUser.email,
-                        password: currentPassword
-                    });
-
-                    if (signInError) {
-                        UI.showAuthMessage('Current password is incorrect.', 'error');
-                        elements.adminChangePasswordBtn.disabled = false;
-                        elements.adminChangePasswordBtn.textContent = 'Update Password';
-                        return;
-                    }
-
                     // Update password
                     const { error } = await supabaseClient.auth.updateUser({
                         password: newPassword
