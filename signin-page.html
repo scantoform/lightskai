@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Light Skai - Sign In</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            min-height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .auth-container {
+            max-width: 440px;
+            width: 100%;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .auth-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 48px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+
+        .auth-logo {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 28px;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+            margin: 0 auto 20px;
+        }
+
+        .auth-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .auth-subtitle {
+            color: #64748b;
+            font-size: 15px;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .form-input {
+            padding: 14px 16px;
+            border: 2px solid #e0e7ff;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        .auth-btn {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 14px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+            margin-top: 8px;
+        }
+
+        .auth-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(99, 102, 241, 0.4);
+        }
+
+        .auth-btn:disabled {
+            background: #e5e7eb;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+            color: #9ca3af;
+        }
+
+        .auth-forgot-password {
+            text-align: right;
+            margin-top: -12px;
+            margin-bottom: 12px;
+        }
+
+        .auth-forgot-link {
+            color: #6366f1;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .auth-forgot-link:hover {
+            text-decoration: underline;
+        }
+
+        .auth-back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            color: #6366f1;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            margin-bottom: 16px;
+        }
+
+        .auth-back-link:hover {
+            text-decoration: underline;
+        }
+
+        .auth-back-link.hidden {
+            display: none;
+        }
+
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 24px 0;
+        }
+
+        .auth-divider-line {
+            flex: 1;
+            height: 1px;
+            background: #e0e7ff;
+        }
+
+        .auth-divider-text {
+            color: #94a3b8;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .auth-toggle {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 24px 0;
+        }
+
+        .auth-toggle-link {
+            color: #6366f1;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .auth-toggle-link:hover {
+            text-decoration: underline;
+        }
+
+        .magic-link-btn {
+            background: white;
+            color: #6366f1;
+            padding: 14px;
+            border-radius: 10px;
+            border: 2px solid #e0e7ff;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .magic-link-btn:hover:not(:disabled) {
+            background: #eef2ff;
+            border-color: #6366f1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        .magic-link-btn:disabled {
+            background: #f1f5f9;
+            color: #94a3b8;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .magic-link-icon {
+            font-size: 18px;
+        }
+
+        .auth-message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .auth-message.active {
+            display: block;
+        }
+
+        .auth-message.error {
+            background: rgba(254, 226, 226, 0.8);
+            color: #dc2626;
+            border: 1px solid #fca5a5;
+        }
+
+        .auth-message.success {
+            background: rgba(209, 250, 229, 0.8);
+            color: #059669;
+            border: 1px solid #6ee7b7;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 640px) {
+            .auth-card {
+                padding: 32px;
+            }
+
+            .auth-title {
+                font-size: 24px;
+            }
+
+            .auth-subtitle {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="auth-logo">LS</div>
+                <h1 class="auth-title" id="authTitle">Welcome Back</h1>
+                <p class="auth-subtitle" id="authSubtitle">Sign in to access your meeting intelligence platform</p>
+            </div>
+
+            <div class="auth-message" id="authMessage"></div>
+
+            <a class="auth-back-link hidden" id="authBackLink">
+                ← Back to Sign In
+            </a>
+
+            <button class="magic-link-btn" id="magicLinkToggle">
+                <span class="magic-link-icon">✨</span>
+                <span id="magicLinkToggleText">Sign in with Magic Link</span>
+            </button>
+
+            <div class="auth-divider">
+                <div class="auth-divider-line"></div>
+                <span class="auth-divider-text">Or</span>
+                <div class="auth-divider-line"></div>
+            </div>
+
+            <form class="auth-form" id="authForm">
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" id="emailInput" placeholder="your@email.com" required>
+                </div>
+                <div class="form-group" id="passwordGroup">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-input" id="passwordInput" placeholder="••••••••" required>
+                </div>
+                <div class="auth-forgot-password" id="forgotPasswordContainer">
+                    <a class="auth-forgot-link" id="forgotPasswordLink">Forgot password?</a>
+                </div>
+                <button type="submit" class="auth-btn" id="authSubmitBtn">Sign In</button>
+            </form>
+
+            <div class="auth-toggle">
+                <span id="authToggleText">Don't have an account?</span>
+                <a class="auth-toggle-link" id="authToggleLink">Sign Up</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        const state = {
+            isLoginMode: true,
+            isMagicLinkMode: false,
+            isForgotPasswordMode: false
+        };
+
+        // DOM elements
+        const elements = {
+            authTitle: document.getElementById('authTitle'),
+            authSubtitle: document.getElementById('authSubtitle'),
+            authSubmitBtn: document.getElementById('authSubmitBtn'),
+            authToggleText: document.getElementById('authToggleText'),
+            authToggleLink: document.getElementById('authToggleLink'),
+            authMessage: document.getElementById('authMessage'),
+            authForm: document.getElementById('authForm'),
+            emailInput: document.getElementById('emailInput'),
+            passwordInput: document.getElementById('passwordInput'),
+            passwordGroup: document.getElementById('passwordGroup'),
+            magicLinkToggle: document.getElementById('magicLinkToggle'),
+            magicLinkToggleText: document.getElementById('magicLinkToggleText'),
+            forgotPasswordLink: document.getElementById('forgotPasswordLink'),
+            forgotPasswordContainer: document.getElementById('forgotPasswordContainer'),
+            authBackLink: document.getElementById('authBackLink')
+        };
+
+        // UI Functions
+        function showMessage(message, type) {
+            elements.authMessage.textContent = message;
+            elements.authMessage.className = `auth-message active ${type}`;
+        }
+
+        function hideMessage() {
+            elements.authMessage.classList.remove('active');
+        }
+
+        function toggleAuthMode() {
+            state.isLoginMode = !state.isLoginMode;
+            state.isMagicLinkMode = false;
+            state.isForgotPasswordMode = false;
+            
+            if (state.isLoginMode) {
+                elements.authTitle.textContent = 'Welcome Back';
+                elements.authSubtitle.textContent = 'Sign in to access your meeting intelligence platform';
+                elements.authSubmitBtn.textContent = 'Sign In';
+                elements.authToggleText.textContent = "Don't have an account?";
+                elements.authToggleLink.textContent = 'Sign Up';
+                elements.passwordGroup.classList.remove('hidden');
+                elements.passwordInput.required = true;
+                elements.magicLinkToggle.classList.remove('hidden');
+                elements.forgotPasswordContainer.classList.remove('hidden');
+                elements.authBackLink.classList.add('hidden');
+            } else {
+                elements.authTitle.textContent = 'Create Account';
+                elements.authSubtitle.textContent = 'Sign up to start using the meeting intelligence platform';
+                elements.authSubmitBtn.textContent = 'Sign Up';
+                elements.authToggleText.textContent = 'Already have an account?';
+                elements.authToggleLink.textContent = 'Sign In';
+                elements.passwordGroup.classList.remove('hidden');
+                elements.passwordInput.required = true;
+                elements.magicLinkToggle.classList.remove('hidden');
+                elements.forgotPasswordContainer.classList.add('hidden');
+                elements.authBackLink.classList.add('hidden');
+            }
+            
+            hideMessage();
+            elements.authForm.reset();
+        }
+
+        function toggleMagicLinkMode() {
+            state.isMagicLinkMode = !state.isMagicLinkMode;
+            state.isForgotPasswordMode = false;
+            
+            if (state.isMagicLinkMode) {
+                elements.authTitle.textContent = 'Magic Link Sign In';
+                elements.authSubtitle.textContent = "Enter your email and we'll send you a magic link to sign in";
+                elements.authSubmitBtn.textContent = 'Send Magic Link';
+                elements.passwordGroup.classList.add('hidden');
+                elements.passwordInput.required = false;
+                elements.magicLinkToggleText.textContent = 'Use Password Instead';
+                elements.forgotPasswordContainer.classList.add('hidden');
+                elements.authBackLink.classList.add('hidden');
+            } else {
+                if (state.isLoginMode) {
+                    elements.authTitle.textContent = 'Welcome Back';
+                    elements.authSubtitle.textContent = 'Sign in to access your meeting intelligence platform';
+                    elements.authSubmitBtn.textContent = 'Sign In';
+                    elements.forgotPasswordContainer.classList.remove('hidden');
+                } else {
+                    elements.authTitle.textContent = 'Create Account';
+                    elements.authSubtitle.textContent = 'Sign up to start using the meeting intelligence platform';
+                    elements.authSubmitBtn.textContent = 'Sign Up';
+                }
+                elements.passwordGroup.classList.remove('hidden');
+                elements.passwordInput.required = true;
+                elements.magicLinkToggleText.textContent = 'Sign in with Magic Link';
+                elements.authBackLink.classList.add('hidden');
+            }
+            
+            hideMessage();
+            elements.authForm.reset();
+        }
+
+        function toggleForgotPasswordMode() {
+            state.isForgotPasswordMode = !state.isForgotPasswordMode;
+            state.isMagicLinkMode = false;
+            
+            if (state.isForgotPasswordMode) {
+                elements.authTitle.textContent = 'Reset Password';
+                elements.authSubtitle.textContent = "Enter your email and we'll send you a password reset link";
+                elements.authSubmitBtn.textContent = 'Send Reset Link';
+                elements.passwordGroup.classList.add('hidden');
+                elements.passwordInput.required = false;
+                elements.magicLinkToggle.classList.add('hidden');
+                elements.forgotPasswordContainer.classList.add('hidden');
+                elements.authToggleText.textContent = '';
+                elements.authToggleLink.classList.add('hidden');
+                elements.authBackLink.classList.remove('hidden');
+            } else {
+                elements.authTitle.textContent = 'Welcome Back';
+                elements.authSubtitle.textContent = 'Sign in to access your meeting intelligence platform';
+                elements.authSubmitBtn.textContent = 'Sign In';
+                elements.passwordGroup.classList.remove('hidden');
+                elements.passwordInput.required = true;
+                elements.magicLinkToggle.classList.remove('hidden');
+                elements.forgotPasswordContainer.classList.remove('hidden');
+                elements.authToggleText.textContent = "Don't have an account?";
+                elements.authToggleLink.classList.remove('hidden');
+                elements.authBackLink.classList.add('hidden');
+            }
+            
+            hideMessage();
+            elements.authForm.reset();
+        }
+
+        // Form submission handler
+        async function handleSubmit(e) {
+            e.preventDefault();
+            
+            const email = elements.emailInput.value;
+            const password = elements.passwordInput.value;
+
+            elements.authSubmitBtn.disabled = true;
+            hideMessage();
+
+            // Simulate API call
+            setTimeout(() => {
+                if (state.isForgotPasswordMode) {
+                    showMessage('If this email is registered, a password reset link will be sent.', 'success');
+                    elements.authSubmitBtn.textContent = 'Send Reset Link';
+                } else if (state.isMagicLinkMode) {
+                    showMessage('If you have an account, a Magic Link will be sent within 5 minutes.', 'success');
+                    elements.authSubmitBtn.textContent = 'Send Magic Link';
+                } else if (state.isLoginMode) {
+                    showMessage('Sign in functionality would go here!', 'success');
+                    elements.authSubmitBtn.textContent = 'Sign In';
+                } else {
+                    showMessage('Account created! Please check your email to verify.', 'success');
+                    elements.authSubmitBtn.textContent = 'Sign Up';
+                }
+                
+                elements.authSubmitBtn.disabled = false;
+            }, 1000);
+        }
+
+        // Event listeners
+        elements.authForm.addEventListener('submit', handleSubmit);
+        elements.authToggleLink.addEventListener('click', toggleAuthMode);
+        elements.magicLinkToggle.addEventListener('click', toggleMagicLinkMode);
+        elements.forgotPasswordLink.addEventListener('click', toggleForgotPasswordMode);
+        elements.authBackLink.addEventListener('click', toggleForgotPasswordMode);
+    </script>
+</body>
+</html>
